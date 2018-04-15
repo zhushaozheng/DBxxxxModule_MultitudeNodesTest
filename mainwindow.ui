@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>720</width>
+    <height>550</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>DBxxxxModule_MutipulNodesTest_Buildx</string>
+  </property>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks</set>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QGroupBox" name="groupBox_Configuration">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>10</y>
+      <width>361</width>
+      <height>60</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>配置项</string>
+    </property>
+    <widget class="QCheckBox" name="checkBox_MainDevice">
+     <property name="geometry">
+      <rect>
+       <x>272</x>
+       <y>28</y>
+       <width>87</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>主测设备</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_DeviceIdentify">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>27</y>
+       <width>75</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>设备标识：</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_DeviceIdentify">
+     <property name="geometry">
+      <rect>
+       <x>94</x>
+       <y>27</y>
+       <width>171</width>
+       <height>21</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="pushButton_BeginTest">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>20</y>
+      <width>91</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>开始测试</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_TestStep">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>80</y>
+      <width>230</width>
+      <height>311</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>测试步骤</string>
+    </property>
+    <widget class="QSlider" name="verticalSlider_TestStep">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>27</y>
+       <width>19</width>
+       <height>261</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_GetVersion">
+     <property name="geometry">
+      <rect>
+       <x>38</x>
+       <y>27</y>
+       <width>180</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>等待：获取设备的版本信息</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_PacketTest">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>150</y>
+       <width>180</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>等待：发包测试可连通功能</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_Report">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>270</y>
+       <width>180</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>等待：提交本轮的测试报告</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_TestLog">
+    <property name="geometry">
+     <rect>
+      <x>249</x>
+      <y>80</y>
+      <width>461</width>
+      <height>311</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>测试记录</string>
+    </property>
+    <widget class="QListView" name="listView_TestLog">
+     <property name="geometry">
+      <rect>
+       <x>-5</x>
+       <y>21</y>
+       <width>471</width>
+       <height>291</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_Status">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>400</y>
+      <width>701</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>设备状态</string>
+    </property>
+    <widget class="QLabel" name="label_DeviceVersion">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>111</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>设备版本信息：</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_DeviceVersion">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>40</y>
+       <width>421</width>
+       <height>21</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_TestStatus">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>530</x>
+       <y>40</y>
+       <width>161</width>
+       <height>21</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QComboBox" name="comboBox_NIC">
+    <property name="geometry">
+     <rect>
+      <x>61</x>
+      <y>490</y>
+      <width>651</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_NIC">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>490</y>
+      <width>45</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>网卡：</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>720</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>verticalSlider_TestStep</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
