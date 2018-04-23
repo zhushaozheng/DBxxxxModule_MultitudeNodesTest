@@ -25,10 +25,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+		common/src/Qt_printf.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+		common/Qt_common_api.h
 
 FORMS += \
         mainwindow.ui
+
+INCLUDEPATH     +=  ./winpcap/Include
+LIBS            +=  -L./winpcap/Lib -lPacket     \
+                    -L./winpcap/Lib -lwpcap
