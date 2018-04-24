@@ -19,16 +19,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::Draw_comboBox_NIC(void )
 {
-	QString aa;
+	QString vNIC;
 	
 	gwinpcap_application.FindAllNicDevs();
 	
-	for (int i = gwinpcap_application.m_NICnum-1;i >= 0;i--)
+	for (int i = 0;i < gwinpcap_application.m_NICnum;i ++)
 	{
-		//aa.sprintf("www.%d", i);
 		//Qt_printf("%s:%d description-len=%d %d  %s\r\n", __FUNCTION__, __LINE__, strlen(gwinpcap_application.m_NICDevice[i].m_Description), i, gwinpcap_application.m_NICDevice[i].m_Description);
-		aa = QString(QLatin1String(gwinpcap_application.m_NICDevice[i].m_Description));
-		ui->comboBox_NIC->addItem(aa);
+		vNIC = QString(QLatin1String(gwinpcap_application.m_NICDevice[i].m_Description));
+		ui->comboBox_NIC->insertItem (i, vNIC);
 	}
 	
 	gwinpcap_application.m_CurNIC = ui->comboBox_NIC->currentIndex();
