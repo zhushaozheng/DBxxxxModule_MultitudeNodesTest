@@ -87,7 +87,7 @@ void winpcap_application::run()
 	
 	while (1)
 	{
-		sleep(2);
+		msleep(10);
 		
 		if (IfChannelOpen())
 		{
