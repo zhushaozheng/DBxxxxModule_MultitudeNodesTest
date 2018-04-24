@@ -7,6 +7,11 @@ winpcap_application::winpcap_application()
 	m_pHandler = NULL;
 	m_NICnum = 0;
 	m_CurNIC = 0;
+	m_LastDispatchBufferPos = 0;
+	m_LastRecvBufferPos = 0;
+	m_MMEFilterLen = 0;
+	
+	start();
 }
 
 winpcap_application::~winpcap_application()
@@ -14,7 +19,101 @@ winpcap_application::~winpcap_application()
 	pcap_freealldevs(m_pAllNIC);
 }
 
-BOOL winpcap_application::FindAllNicDevs()
+void winpcap_application::InitAllBuff()
+{
+	m_LastDispatchBufferPos = 0;
+	m_LastRecvBufferPos = 0;
+	ZeroMemory(m_RecvBuffer, sizeof(CCMMEFrame)*eMaxReceiveBufSz);
+	ZeroMemory(m_DispatchBuffer, sizeof(CCMMEFrame)*eMaxReceiveBufSz);
+}
+
+void winpcap_application::SaveToRecvBuffer(const u_char * apData, int aLen)
+{
+	CCMMEFrame vRecvMMEFrame;
+	
+	if (aLen > sizeof(vRecvMMEFrame))
+	{
+		return;
+	}
+	
+	memset(&vRecvMMEFrame, 0, sizeof(vRecvMMEFrame));
+	memcpy(&vRecvMMEFrame, apData, aLen);
+	//if (vRecvMMEFrame.mGeneric_Reg.mEtherType == cHPAV_Ethertype
+		//|| vRecvMMEFrame.mGeneric_Reg.mEtherType == 0xee88) {
+		m_winpcap_mutex.lock();
+		
+		uint16 vMMType = vRecvMMEFrame.mGeneric_Reg.mMMTYPE;
+		bool vbIsValidMMEType = false;
+		
+		for (uint8 i=0; i<m_MMEFilterLen; i++)
+		{
+			if (vMMType == m_MMEFilter[i])
+			{
+				vbIsValidMMEType = true;
+				
+				break;
+			}
+		}
+		
+		if (vbIsValidMMEType)
+		{
+			if (m_LastRecvBufferPos >= eMaxReceiveBufSz)
+			{
+				m_LastRecvBufferPos = 0;
+				//AfxMessageBox(_T("RecvBuffer Overrun"));
+				m_winpcap_mutex.unlock();
+				
+				return;
+			}
+			
+			memcpy( &m_RecvBuffer[m_LastRecvBufferPos], &vRecvMMEFrame, sizeof(vRecvMMEFrame) );
+			m_LastRecvBufferPos++;
+		}
+		
+		m_winpcap_mutex.unlock();
+	//}
+	//else {
+		//AfxMessageBox(_T("ss"));
+	//}
+}
+
+void winpcap_application::run()
+{
+	if (!m_pHandler) {
+		return;
+	}
+	
+	struct pcap_pkthdr *vpheader;
+	int vRet = 0;
+	const u_char *vpkt_data;
+	
+	while (1)
+	{
+		if (IfChannelOpen())
+		{
+			vRet = pcap_next_ex(m_pHandler, &vpheader, &vpkt_data);
+		}
+		
+		if (vRet < 0 || !IfChannelOpen()) {
+			//-****realse the resource****-//
+			m_winpcap_mutex.unlock();
+			
+			//-****end thread****-//
+			terminate();
+			wait();
+		}
+		else {
+			if (vRet == 0)
+			{
+				continue;
+			}
+			
+			SaveToRecvBuffer(vpkt_data, vpheader->len);	
+		}
+	}
+}
+
+bool winpcap_application::FindAllNicDevs()
 {
 	if (pcap_findalldevs(&m_pAllNIC, m_errbuf) == -1)
 	{
@@ -82,4 +181,121 @@ BOOL winpcap_application::FindAllNicDevs()
 	free( vpOidData );
 	
 	return true;
+}
+
+bool winpcap_application::OpenChannel(uint16 *apMMEFilter, uint8 aMMEFilterLen)
+{
+	/* Open the adapter */
+	if ((m_pHandler = pcap_open_live(	
+		m_NICDevice[m_CurNIC].m_Name,   	// name of the device
+		65536,			                // portion of the packet to capture. It doesn't matter in this case 
+		1,				                // promiscuous mode (nonzero means promiscuous)
+		eChannelTimeout,			    // read timeout
+		m_errbuf		                // error buffer
+		)) == NULL)
+	{
+		return false;
+	}
+	
+	static struct bpf_insn bpf_insn [] =
+	{
+		#if 1
+		{BPF_LD + BPF_H + BPF_ABS, 0, 0, 12},
+		{BPF_JMP + BPF_JEQ + BPF_K, 2, 0, 0x88e1},
+		{BPF_LD + BPF_H + BPF_ABS, 0, 0, 12},
+		{BPF_JMP + BPF_JEQ + BPF_K, 0, 2, 0x88ee},
+		//{BPF_LD + BPF_B + BPF_ABS, 0, 0, 0},
+		//{BPF_JMP + BPF_JEQ + BPF_K, 0, 10, 0},
+		//{BPF_LD + BPF_B + BPF_ABS, 0, 0, 1},
+		//{BPF_JMP + BPF_JEQ + BPF_K, 0, 8, 0},
+		//{BPF_LD + BPF_B + BPF_ABS, 0, 0, 2},
+		//{BPF_JMP + BPF_JEQ + BPF_K, 0, 6, 0},
+		//{BPF_LD + BPF_B + BPF_ABS, 0, 0, 3},
+		//{BPF_JMP + BPF_JEQ + BPF_K, 0, 4, 0},
+		//{BPF_LD + BPF_B + BPF_ABS, 0, 0, 4},
+		//{BPF_JMP + BPF_JEQ + BPF_K, 0, 2, 0},
+		//{BPF_LD + BPF_B + BPF_ABS, 0, 0, 5},
+		//{BPF_JMP + BPF_JEQ + BPF_K, 4, 0, 0},
+		//{BPF_LD + BPF_W + BPF_ABS, 0, 0, 0},
+		//{BPF_JMP + BPF_JEQ + BPF_K, 0, 4, 0xFFFFFFFF},
+		//{BPF_LD + BPF_H + BPF_ABS, 0, 0, 4},
+		//{BPF_JMP + BPF_JEQ + BPF_K, 0, 2, 0xFFFF},
+		{BPF_LD + BPF_W + BPF_LEN, 0, 0, 0},
+		{BPF_RET + BPF_A, 0, 0, 0},
+		{BPF_RET + BPF_K, 0, 0, 0},
+		#endif
+		#if 0
+		BPF_STMT(BPF_LD + BPF_H + BPF_ABS, 12),
+		BPF_JUMP(BPF_JMP + BPF_JEQ + BPF_K, 0, 3, 0),
+		BPF_STMT(BPF_LD + BPF_H + BPF_ABS, 12),
+		BPF_JUMP(BPF_JMP + BPF_JEQ + BPF_K, 0, 0, 3),
+		BPF_STMT(BPF_LD + BPF_W + BPF_LEN, 0),
+		BPF_STMT(BPF_RET + BPF_A, 0),
+		BPF_STMT(BPF_RET + BPF_K, 0),
+		#endif
+	};
+	
+	struct bpf_program bpf_program;
+	bpf_program.bf_len = sizeof (bpf_insn)/sizeof (struct bpf_insn);
+	bpf_program.bf_insns = bpf_insn;
+	
+	//bpf_insn [1].code = BPF_JMP + BPF_JEQ + BPF_K;
+	//bpf_insn [1].jt = 0;
+	//bpf_insn [1].jf = 18;
+	//bpf_insn [1].k = 0x88e1;
+	//bpf_insn [1].jt = 3;
+	//bpf_insn [1].jf = 0;
+	
+	//bpf_insn [3].k = 0x88ee;
+	//bpf_insn [3].jt = 0;
+	//bpf_insn [3].jf = 3;
+	//bpf_insn [6].k = 0;
+	//bpf_insn [3].k = mNICDevice[m_CurNIC].mNICMac.mByte[0];
+	//bpf_insn [5].k = mNICDevice[m_CurNIC].mNICMac.mByte[1];
+	//bpf_insn [7].k = mNICDevice[m_CurNIC].mNICMac.mByte[2];
+	//bpf_insn [9].k = mNICDevice[m_CurNIC].mNICMac.mByte[3];
+	//bpf_insn [11].k = mNICDevice[m_CurNIC].mNICMac.mByte[4];
+	//bpf_insn [13].k = mNICDevice[m_CurNIC].mNICMac.mByte[5];
+	
+	if (pcap_setfilter (m_pHandler, &bpf_program) < 0)
+	{
+		return false;
+	}
+	
+	if (pcap_setmintocopy (m_pHandler, eMinEthSz) < 0)
+	{
+		return false;
+	}
+	
+	m_MMEFilterLen = aMMEFilterLen;
+	memcpy(m_MMEFilter, apMMEFilter, sizeof(uint16)*m_MMEFilterLen);
+
+	start();
+
+	return true;
+}
+
+void winpcap_application::CloseChannel()
+{
+	if (m_pHandler) {
+		pcap_close(m_pHandler);
+	}
+	
+	m_pHandler = NULL;
+	
+	terminate();
+	wait();
+	
+	//-****Initialize all buffers****-//
+	InitAllBuff();
+}
+
+bool winpcap_application::IfChannelOpen()
+{
+	if (m_pHandler) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }

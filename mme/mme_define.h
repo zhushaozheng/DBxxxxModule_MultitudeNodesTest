@@ -179,7 +179,7 @@ public://all members are public for aggregate objects
 
 	inline CCOUI GetOUI()const//return the OUI
 	{
-		return( *(CCOUI*) (void*)&mByte[0]);
+		return( *(CCOUI*) &mByte[0]);
 	};
 
 	inline int32 CompareTo( const CCMACAddress& rCMA ) const
