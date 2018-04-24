@@ -22,3 +22,24 @@ int Qt_printf(const char *apFormat, ...)
 	
 	return i;
 }
+
+void Qt_printf_buffer(char *buff_name, uint8 *pbuff, uint32 buf_len)
+{
+    uint32 i;
+      
+    Qt_printf("%s: len = %d\n", buff_name, buf_len);
+    
+    Qt_printf("%s content:\n", buff_name);
+    for (i = 0; i < buf_len; i++)
+    {
+        if ((i % 16) == 0)
+        {
+            Qt_printf("\n");
+        }
+        Qt_printf("%02x ", *(pbuff + i));
+    }
+    
+    Qt_printf("\n\n");
+    
+    return;
+}

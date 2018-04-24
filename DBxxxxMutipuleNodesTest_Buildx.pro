@@ -28,7 +28,8 @@ SOURCES += \
 	mainwindow.cpp \
 	common/src/Qt_printf.cpp \
     winpcap/Application/winpcap_application.cpp \
-    global.cpp
+    global.cpp \
+    module.cpp
 
 HEADERS += \
 	mainwindow.h \
@@ -51,7 +52,8 @@ HEADERS += \
     winpcap/Include/pcap/sll.h \
     winpcap/Include/pcap/usb.h \
     winpcap/Include/pcap/vlan.h \
-    global.h
+    global.h \
+    module.h
 
 FORMS += \
         mainwindow.ui

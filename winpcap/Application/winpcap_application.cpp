@@ -35,15 +35,16 @@ void winpcap_application::SaveToRecvBuffer(const u_char * apData, int aLen)
 	{
 		return;
 	}
-	
+	//Qt_printf("%s:%d\r\n", __FUNCTION__, __LINE__);
 	memset(&vRecvMMEFrame, 0, sizeof(vRecvMMEFrame));
 	memcpy(&vRecvMMEFrame, apData, aLen);
+	//Qt_printf_buffer("buffer", (uint8*)apData, aLen);
 	//if (vRecvMMEFrame.mGeneric_Reg.mEtherType == cHPAV_Ethertype
 		//|| vRecvMMEFrame.mGeneric_Reg.mEtherType == 0xee88) {
 		m_winpcap_mutex.lock();
 		
 		uint16 vMMType = vRecvMMEFrame.mGeneric_Reg.mMMTYPE;
-		bool vbIsValidMMEType = false;
+		bool vbIsValidMMEType = true;
 		
 		for (uint8 i=0; i<m_MMEFilterLen; i++)
 		{
@@ -72,9 +73,6 @@ void winpcap_application::SaveToRecvBuffer(const u_char * apData, int aLen)
 		
 		m_winpcap_mutex.unlock();
 	//}
-	//else {
-		//AfxMessageBox(_T("ss"));
-	//}
 }
 
 void winpcap_application::run()
@@ -89,6 +87,8 @@ void winpcap_application::run()
 	
 	while (1)
 	{
+		sleep(2);
+		
 		if (IfChannelOpen())
 		{
 			vRet = pcap_next_ex(m_pHandler, &vpheader, &vpkt_data);
@@ -99,8 +99,7 @@ void winpcap_application::run()
 			m_winpcap_mutex.unlock();
 			
 			//-****end thread****-//
-			terminate();
-			wait();
+			exit();
 		}
 		else {
 			if (vRet == 0)
@@ -168,7 +167,7 @@ bool winpcap_application::FindAllNicDevs()
 			}
 			else
 			{
-				Qt_printf("%s:%d\r\n", __FUNCTION__, __LINE__);
+				Qt_printf("%s:%d 错误：获取本机网卡MAC地址失败。\r\n", __FUNCTION__, __LINE__);
 				//AfxMessageBox(_T("错误：获取本机网卡MAC地址失败。"));
 			}
 			
@@ -283,8 +282,9 @@ void winpcap_application::CloseChannel()
 	
 	m_pHandler = NULL;
 	
-	terminate();
-	wait();
+	//terminate();
+	//wait();
+	exit();
 	
 	//-****Initialize all buffers****-//
 	InitAllBuff();
@@ -298,4 +298,79 @@ bool winpcap_application::IfChannelOpen()
 	else {
 		return false;
 	}
+}
+
+void winpcap_application::DispatchPacket(CCMMEFrame aMMEFrame)
+{
+	CCMMEFrame vMMEFrame = aMMEFrame;
+	if (vMMEFrame.mRegular_V0.mEtherType == 0xe188
+		|| vMMEFrame.mRegular_V0.mEtherType == 0xee88) {
+		switch (vMMEFrame.mGeneric_Reg.mMMTYPE) {
+			case VS_SW_VER::eMMTypeCnf: {
+				//gDUTMACAddress = aMMEFrame.mOSA;
+				//gGoldenMACAddress = aMMEFrame.mOSA;
+				//gModule.DispatchMME_VS_SW_VER(vMMEFrame.mRegular_V0.mMMEntry.mVS_SW_VER.CNF, aMMEFrame.mOSA);
+				Qt_printf("%s:%d Rx:VS_SW_VER::eMMTypeCnf\r\n", __FUNCTION__, __LINE__);
+				break;
+			}
+			case VS_NW_INFO_STATS::eMMTypeCnf: {
+				//gModule.DispatchMME_VS_NW_INFO_STATS(vMMEFrame.mRegular_V0.mMMEntry.mVS_NW_INFO_STATS.CNF, aMMEFrame.mOSA);
+				Qt_printf("%s:%d Rx:VS_NW_INFO_STATS::eMMTypeCnf\r\n", __FUNCTION__, __LINE__);
+				break;
+			}
+			case VS_RS_DEV::eMMTypeCnf: {
+				//gModule.DispatchMME_VS_RS_DEV(vMMEFrame.mRegular_V0.mMMEntry.mVS_RS_DEV.CNF);
+				Qt_printf("%s:%d Rx:VS_RS_DEV::eMMTypeCnf\r\n", __FUNCTION__, __LINE__);
+				break;
+			}
+			case VS_Transparent::eMMTypeReq: {
+				//if (!gModule.mISMainDevice ) {
+					//gModule.DispatchMME_VS_Transparent_Req(aMMEFrame.mOSA);
+				//}
+				Qt_printf("%s:%d Rx:VS_Transparent::eMMTypeReq\r\n", __FUNCTION__, __LINE__);
+				break;
+			}
+			case VS_Transparent::eMMTypeCnf: {
+				//if (gModule.mISMainDevice ) {
+					//gModule.DispatchMME_VS_Transparent_Cnf(vMMEFrame.mRegular_V0.mMMEntry.mVS_Transparent.CNF, aMMEFrame.mOSA);
+				//}
+				Qt_printf("%s:%d Rx:VS_Transparent::eMMTypeCnf\r\n", __FUNCTION__, __LINE__);
+				break;
+			}
+			default:
+				break;
+		}
+	}
+	
+	return;
+}
+
+void winpcap_application::DispatchAllPacketsInBuffer(void)
+{
+	unsigned int i;
+	unsigned int loop_count;
+	
+	//If Dispatch buffer is empty, copy Recv buffer to Dispatch buffer
+	if ((m_LastDispatchBufferPos == 0) && (m_LastRecvBufferPos != 0)) {
+		m_winpcap_mutex.lock();
+		
+		ZeroMemory(m_DispatchBuffer, sizeof(m_DispatchBuffer));
+		memcpy(m_DispatchBuffer, m_RecvBuffer, m_LastRecvBufferPos*sizeof(CCMMEFrame));
+		m_LastDispatchBufferPos = m_LastRecvBufferPos;
+		ZeroMemory(m_RecvBuffer, m_LastRecvBufferPos*sizeof(CCMMEFrame));
+		m_LastRecvBufferPos = 0;
+		
+		m_winpcap_mutex.unlock();
+	}
+	
+	//Dispatch all packets in Dispatch buffer
+	loop_count = m_LastDispatchBufferPos;
+	m_winpcap_mutex.lock();
+	
+	for (i = 0; i<loop_count; i++) {
+		DispatchPacket(m_DispatchBuffer[i]);
+	}
+	
+	m_winpcap_mutex.unlock();
+	m_LastDispatchBufferPos = 0;
 }

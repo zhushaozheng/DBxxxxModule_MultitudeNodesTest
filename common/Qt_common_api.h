@@ -21,5 +21,6 @@ typedef short int i16;
 typedef char i8;
 
 int Qt_printf(const char *apFormat, ...);
+void Qt_printf_buffer(char *buff_name, uint8 *pbuff, uint32 buf_len);
 
 #endif // QT_COMMON_API_H

@@ -55,6 +55,8 @@ public:
 	void CloseChannel();
 	bool IfChannelOpen();
 	void SaveToRecvBuffer(const u_char * apData, int aLen);
+	void DispatchPacket(CCMMEFrame aMMEFrame);
+	void DispatchAllPacketsInBuffer(void);
 	
 	CNICDevice m_NICDevice[CNICDevice::eMaxNicDev];
 	int	m_CurNIC;
