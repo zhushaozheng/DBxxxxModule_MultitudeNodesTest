@@ -17,6 +17,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+public:
+	void Draw_comboBox_NIC(void );
 };
 
 #endif // MAINWINDOW_H

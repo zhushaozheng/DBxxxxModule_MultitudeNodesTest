@@ -24,17 +24,40 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
-		common/src/Qt_printf.cpp
+	main.cpp \
+	mainwindow.cpp \
+	common/src/Qt_printf.cpp \
+    winpcap/Application/winpcap_application.cpp
 
 HEADERS += \
-        mainwindow.h \
-		common/Qt_common_api.h
+	mainwindow.h \
+	common/Qt_common_api.h \
+    mme/mme_define.h \
+    winpcap/Application/winpcap_application.h \
+    winpcap/Include/bittypes.h \
+    winpcap/Include/ip6_misc.h \
+    winpcap/Include/Packet32.h \
+    winpcap/Include/pcap.h \
+    winpcap/Include/pcap-bpf.h \
+    winpcap/Include/pcap-namedb.h \
+    winpcap/Include/pcap-stdinc.h \
+    winpcap/Include/remote-ext.h \
+    winpcap/Include/Win32-Extensions.h \
+    winpcap/Include/pcap/bluetooth.h \
+    winpcap/Include/pcap/bpf.h \
+    winpcap/Include/pcap/namedb.h \
+    winpcap/Include/pcap/pcap.h \
+    winpcap/Include/pcap/sll.h \
+    winpcap/Include/pcap/usb.h \
+    winpcap/Include/pcap/vlan.h
 
 FORMS += \
         mainwindow.ui
 
-INCLUDEPATH     +=  ./winpcap/Include
+INCLUDEPATH     +=  ./common \
+					./winpcap/Include \
+					./winpcap/Application \
+					./mme/ \
+					
 LIBS            +=  -L./winpcap/Lib -lPacket     \
                     -L./winpcap/Lib -lwpcap
