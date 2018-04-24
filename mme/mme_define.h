@@ -101,12 +101,12 @@ public://all members are public for aggregate objects
 		uint8 mOUIByte[cOUISz];
 
 		//- Operators -//
-		BOOL operator == ( const CCOUI& rCOU) const
+		bool operator == ( const CCOUI& rCOU) const
 		{//equal operator
 			return( (memcmp( &this->mOUIByte[0] , &rCOU, cOUISz ) == 0) ? true : false);
 		}
 
-		BOOL operator != ( const CCOUI& rCOU ) const
+		bool operator != ( const CCOUI& rCOU ) const
 		{//not equal operator
 			return !(*this == rCOU);
 		}
@@ -148,7 +148,7 @@ public://all members are public for aggregate objects
 	}
 
 
-	inline BOOL IsMulticast()const//Test to see if this is a Multicast address
+	inline bool IsMulticast()const//Test to see if this is a Multicast address
 	{
 		if (IsBroadcast())
 		{
@@ -160,7 +160,7 @@ public://all members are public for aggregate objects
 		}
 	}
 	
-	inline BOOL IsPauseDA()const//Test to see if this is the Pause DA
+	inline bool IsPauseDA()const//Test to see if this is the Pause DA
 	{
 		if ( (mByte[0] == 0x01) //01:80:c2:00:00:01
 			&& (mByte[1] == 0x80)
@@ -179,7 +179,7 @@ public://all members are public for aggregate objects
 
 	inline CCOUI GetOUI()const//return the OUI
 	{
-		return( *(CCOUI*) &mByte[0]);
+		return( *(CCOUI*) (void*)&mByte[0]);
 	};
 
 	inline int32 CompareTo( const CCMACAddress& rCMA ) const
@@ -210,16 +210,16 @@ public:
 		} while ( --vI >= 0 );
 	}
 
-	BOOL operator == ( const CCMACAddress& rCMA) const
+	bool operator == ( const CCMACAddress& rCMA) const
 	{//equal operator
 		return *this == rCMA.mByte;
 	}
 
-	BOOL operator != ( const CCMACAddress& rCMA ) const
+	bool operator != ( const CCMACAddress& rCMA ) const
 	{//not equal operator
         return !(*this == rCMA);
 	}
-	BOOL operator == ( const uint8 *aBytes) const
+	bool operator == ( const uint8 *aBytes) const
 	{//equal operator
 		for ( int vI = cMACAddressSz - 1; vI >=0; vI-- ) {
 			if ( mByte[vI] != aBytes[vI] ) {
@@ -229,18 +229,18 @@ public:
 		return true;
 	}
 
-	BOOL operator != ( const uint8 *aBytes ) const
+	bool operator != ( const uint8 *aBytes ) const
 	{//not equal operator
         return !(*this == aBytes );
 	}
 
-	BOOL operator < ( const CCMACAddress& rCMA ) const
+	bool operator < ( const CCMACAddress& rCMA ) const
 	{//byte-wise less than
 		int vResult = CompareTo( rCMA );
 		return( (vResult < 0) ? true : false);
 	}
 
-	BOOL operator > ( const CCMACAddress& rCMA ) const
+	bool operator > ( const CCMACAddress& rCMA ) const
 	{//byte-wise greater than
 		int vResult = CompareTo( rCMA );
 		return( (vResult > 0) ? true : false);
@@ -344,12 +344,12 @@ public:
 		memcpy( &mByte[0], &aBytes[0], cNIDSz );
 	}
 
-	BOOL operator == ( const CCNetworkID& rCNI) const
+	bool operator == ( const CCNetworkID& rCNI) const
 	{//equal operator
 		return( (memcmp( this , &rCNI, cNIDSz ) == 0) ? true : false);
 	}
 
-	BOOL operator != ( const CCNetworkID& rCNI ) const
+	bool operator != ( const CCNetworkID& rCNI ) const
 	{//not equal operator
         return !(*this == rCNI);
 	}

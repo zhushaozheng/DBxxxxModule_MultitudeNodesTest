@@ -27,7 +27,8 @@ SOURCES += \
 	main.cpp \
 	mainwindow.cpp \
 	common/src/Qt_printf.cpp \
-    winpcap/Application/winpcap_application.cpp
+    winpcap/Application/winpcap_application.cpp \
+    global.cpp
 
 HEADERS += \
 	mainwindow.h \
@@ -49,7 +50,8 @@ HEADERS += \
     winpcap/Include/pcap/pcap.h \
     winpcap/Include/pcap/sll.h \
     winpcap/Include/pcap/usb.h \
-    winpcap/Include/pcap/vlan.h
+    winpcap/Include/pcap/vlan.h \
+    global.h
 
 FORMS += \
         mainwindow.ui
@@ -58,6 +60,7 @@ INCLUDEPATH     +=  ./common \
 					./winpcap/Include \
 					./winpcap/Application \
 					./mme/ \
+					./ 
 					
 LIBS            +=  -L./winpcap/Lib -lPacket     \
                     -L./winpcap/Lib -lwpcap
