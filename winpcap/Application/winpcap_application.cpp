@@ -87,7 +87,7 @@ void winpcap_application::run()
 	
 	while (1)
 	{
-		msleep(10);
+		usleep(1);
 		
 		if (IfChannelOpen())
 		{
@@ -268,7 +268,7 @@ bool winpcap_application::OpenChannel(uint16 *apMMEFilter, uint8 aMMEFilterLen)
 	
 	m_MMEFilterLen = aMMEFilterLen;
 	memcpy(m_MMEFilter, apMMEFilter, sizeof(uint16)*m_MMEFilterLen);
-
+	
 	start();
 
 	return true;
